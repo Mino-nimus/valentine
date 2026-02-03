@@ -8,7 +8,7 @@ function validateConfig() {
     // Check required fields
     if (!config.valentineName) {
         warnings.push("Valentine's name is not set! Using default.");
-        config.valentineName = "My Love";
+        config.valentineName = "MY BUB";
     }
 
     // Validate colors
@@ -59,13 +59,28 @@ window.addEventListener('DOMContentLoaded', () => {
     validateConfig();
 
     // Set texts from config
-    document.getElementById('valentineTitle').textContent = `${config.valentineName}, my love...`;
+    document.getElementById('valentineTitle').textContent = `${config.valentineName}, my bub...`;
     
     // Set first question texts
     document.getElementById('question1Text').textContent = config.questions.first.text;
     document.getElementById('yesBtn1').textContent = config.questions.first.yesBtn;
     document.getElementById('noBtn1').textContent = config.questions.first.noBtn;
     document.getElementById('secretAnswerBtn').textContent = config.questions.first.secretAnswer;
+
+    // Add click event to play music when secret button is clicked
+    document.getElementById('secretAnswerBtn').addEventListener('click', () => {
+        const bgMusic = document.getElementById('bgMusic');
+        const musicToggle = document.getElementById('musicToggle');
+        
+        if (bgMusic && bgMusic.paused) {
+            bgMusic.play().then(() => {
+                musicToggle.textContent = config.music.stopText;
+            }).catch(error => {
+                console.log("Music play prevented:", error);
+            });
+        }
+        showNextQuestion(2);
+    });
     
     // Set second question texts
     document.getElementById('question2Text').textContent = config.questions.second.text;
@@ -79,6 +94,8 @@ window.addEventListener('DOMContentLoaded', () => {
 
     // Create initial floating elements
     createFloatingElements();
+    //setupPolaroidPhoto();
+    setupPhoto();  // Add this line
 
     // Setup music player
     setupMusicPlayer();
@@ -199,7 +216,6 @@ function createHeartExplosion() {
         setRandomPosition(heart);
     }
 }
-
 // Music Player Setup
 function setupMusicPlayer() {
     const musicControls = document.getElementById('musicControls');
@@ -218,16 +234,8 @@ function setupMusicPlayer() {
     bgMusic.volume = config.music.volume || 0.5;
     bgMusic.load();
 
-    // Try autoplay if enabled
-    if (config.music.autoplay) {
-        const playPromise = bgMusic.play();
-        if (playPromise !== undefined) {
-            playPromise.catch(error => {
-                console.log("Autoplay prevented by browser");
-                musicToggle.textContent = config.music.startText;
-            });
-        }
-    }
+    // Music will start when secret button is clicked
+    // Autoplay is disabled
 
     // Toggle music on button click
     musicToggle.addEventListener('click', () => {
@@ -239,4 +247,16 @@ function setupMusicPlayer() {
             musicToggle.textContent = config.music.startText;
         }
     });
-} 
+}
+
+function setupPhoto() {
+    if (!config.personalPhoto || !config.personalPhoto.enabled) {
+        return;
+    }
+
+    const img = document.createElement('img');
+    img.src = config.personalPhoto.imageUrl;
+    img.className = 'corner-photo';
+    img.alt = 'Photo';
+    document.body.appendChild(img);
+}
